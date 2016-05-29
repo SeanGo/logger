@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
                 sprintf(buf, "accept form %s:%d\n", inet_ntoa(cliaddr.sin_addr), cliaddr.sin_port);
                 printf("%d:%s", ++acceptCount, buf);
 
-                if (curfds >= configData.block_number)
+                if (curfds >= (int)configData.block_number)
                 {
                     fprintf(stderr, "too many connection, more than %d\n",
                             configData.block_number);
@@ -277,7 +277,7 @@ static void set_signal()
     }
 }
 
-int read_socket_to_recv_buffer(Client *in_client, ThreadData *out_thread_data)
+ssize_t read_socket_to_recv_buffer(Client *in_client, ThreadData *out_thread_data)
 {
     out_thread_data->free = false;
     int connfd = in_client->nfd;
@@ -292,7 +292,7 @@ int read_socket_to_recv_buffer(Client *in_client, ThreadData *out_thread_data)
         return -1;
     }
 
-    size_t nLeftLength = configData.size_of_buffer;
+    ssize_t nLeftLength = configData.size_of_buffer;
     if (pRecvBuffer->data_end_ptr!=pRecvBuffer->data_start_ptr)
     {
         nLeftLength=nLeftLength-(pRecvBuffer->data_end_ptr-pRecvBuffer->data_start_ptr+1);
@@ -302,7 +302,7 @@ int read_socket_to_recv_buffer(Client *in_client, ThreadData *out_thread_data)
 
     uchar *write_ptr = pRecvBuffer->data_end_ptr==pRecvBuffer->data_start_ptr?
                 pRecvBuffer->data_start_ptr:pRecvBuffer->data_end_ptr+1;
-    size_t nread = read(connfd, write_ptr, nLeftLength);//读取客户端socket流
+    ssize_t nread = read(connfd, write_ptr, nLeftLength);//读取客户端socket流
     if (nread == 0)
     {
         printf("client close the connection\n");
@@ -331,21 +331,21 @@ int read_socket_to_recv_buffer(Client *in_client, ThreadData *out_thread_data)
     * 2.one or more full lines "111\r\n2222\r\n"
     * 3.one or more full lines and harf line "111\n22222"
     */
-    char *line_start = NULL;
-    char *line_end = NULL;
-    bool have_multi_line = false;
+    uchar *line_start = NULL;
+    uchar *line_end = NULL;
+    int have_multi_line = 0;
     bool have_half_line = get_end_half_line(pRecvBuffer->data_start_ptr, write_ptr+nread-1,
                                             &line_start, &line_end, &have_multi_line);
 
     //1
-    if(have_multi_line==false && have_half_line==true)
+    if(have_multi_line==0 && have_half_line==true)
     {
         pRecvBuffer->data_end_ptr = write_ptr+nread-1;
         out_thread_data->free = true;
         return 0;
     }
     //2
-    else if(have_multi_line==true && have_half_line==false)
+    else if(have_multi_line==1 && have_half_line==false)
     {
         block->bufIndexToWrite++;
         if (block->bufIndexToWrite>=configData.buffer_number_in_block)
@@ -367,7 +367,6 @@ int read_socket_to_recv_buffer(Client *in_client, ThreadData *out_thread_data)
 
         RecvBuffer *second_recv_buffer = get_next_free_recv_buffer(block);
         //printf("block->bufIndexToWrite=%d\n", block->bufIndexToWrite);
-        char t[1024];
         //printf("%s--read !!!!---\n",get_current_time(t));
         if(second_recv_buffer == NULL)
         {

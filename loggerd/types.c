@@ -131,7 +131,7 @@ void init_objects()
 {
     int i=0;
     int j=0;
-    for (i=0; i<configData.block_number;i++)
+    for (i=0; i<(int)configData.block_number;i++)
     {
         Block *pBlock = get_block(i);
         pBlock->free = true;
@@ -139,7 +139,7 @@ void init_objects()
         pBlock->pHeadPtr = NULL;
         pBlock->pTailPtr = NULL;
 //        printf("block:%d-%d\n", (int)pBlock, (int)(void*)pBlock+sizeof(Block));
-        for(j=0; j<configData.buffer_number_in_block;j++)//init buffers
+        for(j=0; j<(int)configData.buffer_number_in_block;j++)//init buffers
         {
             RecvBuffer *pRecvBuffer = get_recv_buffer(pBlock, j);
             init_recv_buffer(pRecvBuffer, i*configData.buffer_number_in_block+j);
@@ -150,7 +150,7 @@ void init_objects()
     }
 
     int n=0;
-    for(n=0; n<configData.thread_number; n++)//init threaddatas
+    for(n=0; n<(int)configData.thread_number; n++)//init threaddatas
     {
         ThreadData *pThreadData = get_thread_data(n);
         init_thread_data(pThreadData);
@@ -161,7 +161,7 @@ void init_objects()
 ThreadData *get_one_free_thread_data()
 {
     int i=0;
-    for(i=0; i<configData.thread_number; i++)
+    for(i=0; i<(int)configData.thread_number; i++)
     {
         ThreadData* pThreadData = get_thread_data(i);
         if (pThreadData->free == true)
@@ -178,7 +178,7 @@ void reset_block(Block *pBlock)
     pBlock->free = true;
     pBlock->bufIndexToWrite = 0;
     int i=0;
-    for(i=0; i<configData.buffer_number_in_block; i++)
+    for(i=0; i<(int)configData.buffer_number_in_block; i++)
     {
         RecvBuffer *pRecvBuffer = get_recv_buffer(pBlock, i);
         pRecvBuffer->data_end_ptr = pRecvBuffer->data_start_ptr;
@@ -191,7 +191,7 @@ void reset_block(Block *pBlock)
 Block *get_on_free_block()
 {
     int i=0;
-    for(i=0; i<configData.block_number;i++)
+    for(i=0; i<(int)configData.block_number;i++)
     {
         Block *pBlock = get_block(i);
         if(pBlock->free == true)

@@ -68,7 +68,7 @@ void *pasreProc(void *p) {
 
 int create_parse_threads() {
   int i = 0;
-  for (i = 0; i < configData.thread_number; i++) {
+  for (i = 0; i < (int)configData.thread_number; i++) {
     ThreadData *pThreadData = get_thread_data(i);
     pthread_t id;
     if (0 != pthread_create(&id, NULL, pasreProc, pThreadData)) {

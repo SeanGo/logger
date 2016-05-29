@@ -1,4 +1,5 @@
 #include <string.h>
+#include <unistd.h>
 #include "client.h"
 
 void init_client(Client *pClient)

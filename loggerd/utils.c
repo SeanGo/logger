@@ -12,14 +12,14 @@ params:
 return:
     fist line length
 */
-int get_next_line(char *szInSrc,
+int get_next_line(uchar *szInSrc,
                   int nInSrcLength,
-                  char **pOutLineStartPos,
+                  uchar **pOutLineStartPos,
                   int *nLeftStringLength,
                   int *nIsFullLine)
 {
-    char *src = szInSrc;
-    char *pLineEndPos = src;
+    uchar *src = szInSrc;
+    uchar *pLineEndPos = src;
     *nLeftStringLength = nInSrcLength;
     *nIsFullLine = 1;
 
@@ -103,12 +103,12 @@ int read_next_line(const char *src, char ** pLineStart, char ** pLineEnd, int *p
 /**
   return:true-half line,false-full line
 */
-bool get_end_half_line(const char *str_src_start, const char *str_src_end,
-                       char ** out_last_line_start, char **out_last_line_end,
-                       bool *have_multi_mines)
+bool get_end_half_line(const uchar *str_src_start, const uchar *str_src_end,
+                       uchar ** out_last_line_start, uchar **out_last_line_end,
+                       int *have_multi_mines)
 {
-    char *p = (char*)str_src_end;
-    *out_last_line_end = (char*)str_src_end;
+    uchar *p = (uchar*)str_src_end;
+    *out_last_line_end = (uchar*)str_src_end;
     *have_multi_mines = false;
 
     while(*p != '\n' && p>str_src_start)

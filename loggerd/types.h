@@ -33,11 +33,11 @@ typedef struct ThreadData
 
 typedef struct ConfData
 {
-    int local_port;
-    int thread_number;
+    unsigned int local_port;
+    unsigned int thread_number;
     size_t size_of_buffer;
-    int buffer_number_in_block;
-    int block_number;
+    unsigned int buffer_number_in_block;
+    unsigned int block_number;
 }ConfData;
 
 #ifdef __cplusplus

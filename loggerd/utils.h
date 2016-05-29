@@ -21,16 +21,16 @@ extern "C" {
 
 char *get_current_time(char t[]);
 
-int get_next_line(char *szInSrc,
+int get_next_line(uchar *szInSrc,
     int nInSrcLength,
-    char **pOutLineStartPos,
+    uchar **pOutLineStartPos,
     int *nLeftStringLength,
     int *nIsFullLine);
 
 int read_next_line(const char *src, char ** pLineStart, char ** pLineEnd, int *pFullLine);
 
-bool get_end_half_line(const char *str_src_start, const char *str_src_end,
-                    char ** out_last_line_start, char **out_last_lineEnd, bool *have_multi_lines);
+bool get_end_half_line(const uchar *str_src_start, const uchar *str_src_end,
+                    uchar **out_last_line_start, uchar **out_last_lineEnd, int *have_multi_lines);
 
 //2016/02/01 08:18:40
 int format_time1(char * szTime, time_t *out_time);

@@ -21,7 +21,7 @@ TEST(TestTypedefs, TestTypedefs) {
   int nRet = init_mem();
   EXPECT_EQ(nRet, 0);
 
-  for (int i = 0; i < configData.block_number; i++) {
+  for (int i = 0; i < (int)configData.block_number; i++) {
     Block *pBlock = get_block(i);
     pBlock->free = true;
     pBlock->bufIndexToWrite = 0;
@@ -32,15 +32,15 @@ TEST(TestTypedefs, TestTypedefs) {
                 reinterpret_cast<void *>(pBlock));
     }
 
-    for (int j = 0; j < configData.buffer_number_in_block; j++) // init buffers
+    for (int j = 0; j < (int)configData.buffer_number_in_block; j++) // init buffers
     {
       RecvBuffer *pRecvBuffer = get_recv_buffer(pBlock, j);
       init_recv_buffer(pRecvBuffer, i * configData.buffer_number_in_block + j);
       if (j == 0 && i == 0) {
         EXPECT_EQ(reinterpret_cast<void *>(pRecvBuffer->data_start_ptr),
                   reinterpret_cast<void *>(base_recv_data_memory));
-      } else if (j == configData.buffer_number_in_block - 1 &&
-                 i == configData.block_number - 1) {
+      } else if (j == (int)configData.buffer_number_in_block - 1 &&
+                 i == (int)configData.block_number - 1) {
         EXPECT_EQ(
             reinterpret_cast<void *>(pRecvBuffer->data_start_ptr +
                                      configData.size_of_buffer),
@@ -52,11 +52,11 @@ TEST(TestTypedefs, TestTypedefs) {
     }
   }
 
-  for (int n = 0; n < configData.thread_number; n++) // init threaddatas
+  for (int n = 0; n < (int)configData.thread_number; n++) // init threaddatas
   {
     ThreadData *pThreadData = get_thread_data(n);
     init_thread_data(pThreadData);
-    if (n == configData.buffer_number_in_block) {
+    if (n == (int)configData.buffer_number_in_block) {
       EXPECT_EQ(reinterpret_cast<void *>(base_objects_memory +
                                          get_size_of_block() *
                                              configData.block_number),
@@ -96,11 +96,11 @@ TEST(TestMyLog, TestMyLog) {
 }
 
 TEST(TestgetEndHalfLine, getEndHalfLine0) {
-  char szData[512] = "log0";
-  char *pLineStart = NULL;
-  char *pLineEnd = NULL;
-  bool haveMultiLine = false;
-  bool bRet = get_end_half_line(szData, szData + strlen(szData), &pLineStart,
+  uchar szData[512] = "log0";
+  uchar *pLineStart = NULL;
+  uchar *pLineEnd = NULL;
+  int haveMultiLine = 0;
+  bool bRet = get_end_half_line(szData, szData + strlen((char*)szData), &pLineStart,
                                 &pLineEnd, &haveMultiLine);
   EXPECT_EQ(bRet, true);
   EXPECT_EQ(haveMultiLine, false);
@@ -109,24 +109,24 @@ TEST(TestgetEndHalfLine, getEndHalfLine0) {
 }
 
 TEST(TestgetEndHalfLine, getEndHalfLine1) {
-  bool haveMultiLine = false;
-  char szData[512] = "log0\r\nlog1";
-  char *pLineStart = NULL;
-  char *pLineEnd = NULL;
-  bool bRet = get_end_half_line(szData, szData + strlen(szData), &pLineStart,
+  int haveMultiLine = 0;
+  uchar szData[512] = "log0\r\nlog1";
+  uchar *pLineStart = NULL;
+  uchar *pLineEnd = NULL;
+  bool bRet = get_end_half_line(szData, szData + strlen((char*)szData), &pLineStart,
                                 &pLineEnd, &haveMultiLine);
   EXPECT_EQ(bRet, true);
-  EXPECT_EQ(haveMultiLine, true);
+  EXPECT_EQ(haveMultiLine, 1);
   EXPECT_EQ(pLineStart, szData + 6);
   printf("%s\n", pLineStart);
 }
 
 TEST(TestgetEndHalfLine, getEndHalfLine2) {
-  char szData[512] = "log0\r\n";
-  char *pLineStart = NULL;
-  char *pLineEnd = NULL;
-  bool haveMultiLine = false;
-  bool bRet = get_end_half_line(szData, szData + strlen(szData), &pLineStart,
+  uchar szData[512] = "log0\r\n";
+  uchar *pLineStart = NULL;
+  uchar *pLineEnd = NULL;
+  int haveMultiLine = 0;
+  bool bRet = get_end_half_line(szData, szData + strlen((char*)szData), &pLineStart,
                                 &pLineEnd, &haveMultiLine);
   EXPECT_EQ(bRet, false);
   EXPECT_EQ(haveMultiLine, true);
@@ -171,9 +171,9 @@ TEST(readNextLine, readNextLine0) {
 
 TEST(get_next_line, get_next_line) {
   int nFullLine = 0;
-  char szData[1024] = "May\n 06 19:39:58 hitrade1\r\n Receive Nak";
+  uchar szData[1024] = "May\n 06 19:39:58 hitrade1\r\n Receive Nak";
 
-  char *pLineStart = NULL;
+  uchar *pLineStart = NULL;
   int srcLength = strlen((char *)szData);
   int nLen =
       get_next_line(szData, srcLength, &pLineStart, &srcLength, &nFullLine);
@@ -183,9 +183,8 @@ TEST(get_next_line, get_next_line) {
   EXPECT_EQ(nFullLine, 1);
 
   pLineStart = pLineStart + nLen;
-  nLen =
-      get_next_line(pLineStart, srcLength, &pLineStart, &srcLength, &nFullLine);
-  EXPECT_STREQ(pLineStart, szData + 4);
+  nLen = get_next_line(pLineStart, srcLength, &pLineStart, &srcLength, &nFullLine);
+  EXPECT_STREQ((char*)pLineStart, (char*)szData + 4);
   EXPECT_EQ(nLen, 21);
   EXPECT_EQ(srcLength, 14);
   EXPECT_EQ(nFullLine, 1);
@@ -193,7 +192,7 @@ TEST(get_next_line, get_next_line) {
   pLineStart = pLineStart + nLen;
   nLen =
       get_next_line(pLineStart, srcLength, &pLineStart, &srcLength, &nFullLine);
-  EXPECT_STREQ(pLineStart, " Receive Nak");
+  EXPECT_STREQ((char*)pLineStart, " Receive Nak");
   EXPECT_EQ(nLen, 12);
   EXPECT_EQ(srcLength, 0);
   EXPECT_EQ(nFullLine, 0);
